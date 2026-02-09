@@ -1,223 +1,142 @@
 ﻿#include "Player.h"
 
-#include "Player.h"
-
 Player::Player()
+    : scale(4.f), speed(200.f), gravity(1100.f), jumpForce(-500.f),
+    maxFallSpeed(1000.f), groundY(1000.f), isOnGround(true), isAttacking(false)
 {
-    // Charger la texture
-    if (!textureRun.loadFromFile("assets/player/herochar_run_anim_strip_6.png")) {
-        std::cerr << "Erreur chargement texture player ";
-    }
+    // Charger les animations (loop=true sauf pour attack)
+    animations["idle"] = std::make_unique<Animation>(
+        "assets/player/herochar_idle_anim_strip_4.png", 16, 16, 4, 0.2f, true);
+    animations["run"] = std::make_unique<Animation>(
+        "assets/player/herochar_run_anim_strip_6.png", 16, 16, 6, 0.11f, true);
+    animations["attack"] = std::make_unique<Animation>(
+        "assets/player/herochar_sword_attack_anim_strip_4.png", 32, 16, 4, 0.15f, false);  // loop=false
 
-    if (!textureAttack.loadFromFile("assets/player/herochar_sword_attack_anim_strip_4.png")) {
-        std::cerr << "Erreur chargement texture attack";
-    }
+    currentAnimation = "idle";  //anim de base
+    sprite.setTexture(animations[currentAnimation]->getTexture());
+    sprite.setScale(scale, scale);
+    sprite.setPosition(400.f, groundY);
 
-    if (!textureIdle.loadFromFile("assets/player/herochar_idle_anim_strip_4.png")) {
-        std::cerr << "Erreur chargement texture iddle";
-    }
+    velocity = sf::Vector2f(0.f, 0.f);  // Initialiser velocity
 
-    //paramètres physique
-
-    gravity = 1100; //gravite en pixel/s
-    jumpForce = -500;    //force saut
-    velocityY = 0.f;    //vitesse y actuelle
-    maxFallSpeed = 1000.f; //vitesse max de chute
-    groundY = 700.f;    //sol
-    isonground = true;
-
-
-
-    // Taille du sprite (si spritesheet, ajuste ici)
-    runFrameWidth = 16;
-    runFrameHeight = 16;
-
-    attackFrameHeight = 16;
-    attackFrameWidth = 32;
-
-    idleFrameHeight = 16;
-    idleFrameWidth = 16;
-
-
-    //animation
-    currentState = AnimationState::IDLE;    //animation de base
-    currentFrame = 0;
-    runFrameCount = 6;
-    attackFrameCount = 4;
-    idleFrameCount = 4;
-
-    animationSpeed = 0.11f;
-    attackAnimationSpeed = 0.2f;
-    idleAnimationSpeed = 0.2f;
-
-    isAttacking = false;
-
-
-
-
-    sprite.setTexture(textureRun);
-    sprite.setOrigin(runFrameWidth / 2.f, runFrameHeight / 2.f);
-    sprite.setScale(4.f, 4.f);
-    sprite.setPosition(400.f, groundY - runFrameHeight *  4.f / 2.f);
-
-    sprite.setTextureRect(sf::IntRect(0, 0, runFrameWidth, runFrameHeight));
-
-    // --- Hitbox ---
+    // Hitbox
     hitbox.setSize(sf::Vector2f(24.f, 32.f));
     hitbox.setFillColor(sf::Color::Transparent);
-    hitbox.setOutlineColor(sf::Color::Red);   // Debug
+    hitbox.setOutlineColor(sf::Color::Red);
     hitbox.setOutlineThickness(1.f);
-
-    // Décalage hitbox par rapport au sprite
-    hitboxOffset = sf::Vector2f(5.f, 0.f);
-
-    hitbox.setPosition(sprite.getPosition());
-
-    // --- Mouvement ---
-    speed = 200.f;
 }
 
+float Player::getVelocityX()const {
+    return velocity.x;
+}
 
-void Player::attack() {
-    if (!isAttacking) {
-        isAttacking = true;
-        currentState = AnimationState::ATTACK;
-        currentFrame = 0;
-        sprite.setTexture(textureAttack);
-        sprite.setOrigin(attackFrameWidth / 2.f, attackFrameHeight / 2.f);
-        animationClock.restart();
+void Player::switchAnimation(const std::string& animName) {
+    if (currentAnimation != animName) {
+        currentAnimation = animName;
+        animations[animName]->reset();
+        sprite.setTexture(animations[animName]->getTexture());
+
+        int frameWidth = animations[animName]->getFrameWidth();
+        int frameHeight = animations[animName]->getFrameHeight();
+        sprite.setOrigin(frameWidth / 2.f, frameHeight / 2.f);
     }
 }
 
+void Player::handleInput() {
+    bool moving = false;
 
-void Player::update(float deltaTime)
-{
-    sf::Vector2f movement(0.f, 0.f);
-    bool ismoving = false;
-    float scale = 4.f;
-
-
-    //saut 
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && (isonground) && (!isAttacking)) {
-        velocityY = jumpForce;
-        isonground = false;
-    }
-
-    if (!isonground) {  //si saut detecté
-        velocityY += gravity * deltaTime;
-
-        if (velocityY > maxFallSpeed) {
-            velocityY = maxFallSpeed;
-        }
-    }
-
-    //attaque
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && (!isAttacking)) {
-        attack();
-    }
-
-    //gauche
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q) && (!isAttacking)) {
-        sprite.setScale(-scale, scale);
-        movement.x -= speed;
-        ismoving = true;
-    }
-    //droite
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::D) && (!isAttacking)) {
-        sprite.setScale(scale, scale);
-        movement.x += speed;
-        ismoving = true;
-    }
-
-
-
-    // Déplacement horizontale
-    sprite.move(movement * deltaTime);
-
-    //deplacement verticale
-    sf::Vector2f position = sprite.getPosition();
-    position.y += velocityY * deltaTime;
-
-    float playerBottom = position.y + (runFrameHeight * scale / 2.f);
-    if (playerBottom >= groundY) {
-        position.y = groundY - (runFrameHeight * scale / 2.f);
-        velocityY = 0.f;
-        isonground = true;
-    }
-
-    sprite.setPosition(position);
-
-    // Synchroniser la hitbox avec le sprite
-    hitbox.setPosition(sprite.getPosition()+ hitboxOffset);
-
+    // Empêcher input pendant l'attaque
     if (isAttacking) {
-        if (animationClock.getElapsedTime().asSeconds() >= attackAnimationSpeed) {
-            currentFrame++;
-            if (currentFrame >= attackFrameCount) {
-                //fin animation
-                isAttacking = false;
-                currentFrame = 0;
-                currentState = AnimationState::IDLE;
-                sprite.setTexture(textureRun);  //retour a la texture de base
-            }
-
-            sprite.setTextureRect(sf::IntRect(
-                currentFrame * attackFrameWidth,
-                0,
-                attackFrameWidth,
-                attackFrameHeight
-            ));
-            animationClock.restart();
-        }
+        velocity.x = 0.f;  // Arrêter le mouvement horizontal
+        return;  // Ne pas traiter les autres inputs
     }
-    else if (ismoving) {
 
-        if (animationClock.getElapsedTime().asSeconds() >= animationSpeed) {
-            sprite.setTexture(textureRun);
-            currentState = AnimationState::RUN;
-            sprite.setOrigin(runFrameWidth / 2.f, runFrameHeight / 2.f);
-            currentFrame = (currentFrame + 1) % runFrameCount;
-            sprite.setTextureRect(sf::IntRect(
-                currentFrame * runFrameWidth,
-                0,
-                runFrameWidth,
-                runFrameHeight
+    // Saut
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && isOnGround) {
+        velocity.y = jumpForce;
+        isOnGround = false;
+    }
 
-            ));
-            animationClock.restart();
-        }
+    // Attaque
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+        isAttacking = true;
+        velocity.x = 0.f;  // Arrêter le mouvement
+        switchAnimation("attack");
+        return;  // Ne pas traiter les autres inputs
+    }
+
+    // Mouvement horizontal
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+        sprite.setScale(-scale, scale);
+        velocity.x = -speed;
+        moving = true;
+    }
+    else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+        sprite.setScale(scale, scale);
+        velocity.x = speed;
+        moving = true;
     }
     else {
-        if (currentState != AnimationState::IDLE) {      //image fixe
-            currentState = AnimationState::IDLE;
-            sprite.setOrigin(idleFrameWidth / 2.f, idleFrameHeight /2.f);
-            currentFrame = 0;
-            animationClock.restart();
-        }
-        if (animationClock.getElapsedTime().asSeconds() >= idleAnimationSpeed) {
-            sprite.setTexture(textureIdle);
-            currentFrame = (currentFrame + 1) % idleFrameCount;
-            sprite.setTextureRect(sf::IntRect(
-                currentFrame * idleFrameWidth,
-                0,
-                idleFrameWidth,
-                idleFrameHeight
-            ));
-            animationClock.restart();
-        }
+        velocity.x = 0.f;
+    }
+
+    // Changer l'animation selon le mouvement
+    if (moving) {
+        switchAnimation("run");
+    }
+    else {
+        switchAnimation("idle");
     }
 }
 
+void Player::updatePhysics(float deltaTime) {
+    if (!isOnGround) {
+        velocity.y += gravity * deltaTime;
+        if (velocity.y > maxFallSpeed) {
+            velocity.y = maxFallSpeed;
+        }
+    }
 
+    sprite.move(velocity.x * deltaTime, velocity.y * deltaTime);
 
+    sf::Vector2f position = sprite.getPosition();
+    float playerBottom = position.y + (16 * scale / 2.f);
 
-void Player::draw(sf::RenderWindow& window)
-{
-    window.draw(sprite);
-    window.draw(hitbox); // À retirer quand tu n'en as plus besoin
+    if (playerBottom >= groundY) {
+        position.y = groundY - (16 * scale / 2.f);
+        velocity.y = 0.f;
+        isOnGround = true;
+        sprite.setPosition(position);
+    }
 }
 
-sf::FloatRect Player::getHitbox() const
-{
+void Player::updateAnimation(float deltaTime) {
+    animations[currentAnimation]->update(deltaTime);
+    sprite.setTextureRect(animations[currentAnimation]->getCurrentFrame());
+
+    // Fin de l'attaque
+    if (isAttacking && animations["attack"]->isFinished()) {
+        isAttacking = false;
+        switchAnimation("idle");
+    }
+}
+
+void Player::update(float deltaTime) {
+    handleInput();
+    updatePhysics(deltaTime);
+    updateAnimation(deltaTime);
+
+    // Centrer la hitbox
+    sf::Vector2f spritePos = sprite.getPosition();
+    hitbox.setPosition(spritePos.x - hitbox.getSize().x / 2.f,
+        spritePos.y - hitbox.getSize().y / 2.f);
+}
+
+void Player::draw(sf::RenderWindow& window) {
+    window.draw(sprite);
+    window.draw(hitbox);
+}
+
+sf::FloatRect Player::getHitbox() const {
     return hitbox.getGlobalBounds();
 }

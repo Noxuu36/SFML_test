@@ -1,4 +1,5 @@
 #pragma once
+#include "Animation.h"
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
@@ -11,63 +12,34 @@ public:
 
     sf::FloatRect getHitbox() const;
 
-    void attack();
+    void handleInput();
+    void updatePhysics(float deltaTime);
+    void updateAnimation(float deltaTime);
+    void switchAnimation(const std::string& animName);
+    float getVelocityX() const;
+
 
 
 
 private:
     // --- Visuel ---
-    sf::Texture textureRun;
-    sf::Texture textureAttack;
-    sf::Texture textureIdle;
     sf::Sprite sprite;
-
+    std::map<std::string, std::unique_ptr <Animation>> animations; //map d'animation associé a un nom
+    std::string currentAnimation;
+    float scale;
 
     // --- Collision ---
     sf::RectangleShape hitbox;
-    sf::Vector2f hitboxOffset;
 
-    // --- Mouvement ---
+    //physique
+    sf::Vector2f velocity;
     float speed;
-    float velocityY;
-
-    // physique
-
     float gravity;
-    bool isonground;
     float jumpForce;
-    float groundY;
     float maxFallSpeed;
-
-    //animation
-    enum class AnimationState {
-        IDLE,
-        RUN,
-        ATTACK
-    };
-
-    AnimationState currentState;
-    //animation
-    int runFrameWidth;
-    int runFrameHeight;
-
-    int attackFrameHeight;
-    int attackFrameWidth;
-   
-    int currentFrame;
-    sf::Clock animationClock;   //temps entre 2 frames
-
-    //spécifique a chaque animation
-    int runFrameCount;
-    float animationSpeed;
-    int attackFrameCount;
+    float isOnGround;
     bool isAttacking;
-    float attackAnimationSpeed;
-
-    int idleFrameHeight;
-    int idleFrameWidth;
-    int idleFrameCount;
-    float idleAnimationSpeed;
+    float groundY;
 
 
 };
