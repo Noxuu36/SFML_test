@@ -2,7 +2,8 @@
 
 Player::Player()
     : scale(4.f), speed(200.f), gravity(1100.f), jumpForce(-500.f),
-    maxFallSpeed(1000.f), groundY(1000.f), isOnGround(true), isAttacking(false)
+    maxFallSpeed(1000.f), groundY(1000.f), isOnGround(true), isAttacking(false),
+    attackHitboxActive(false)
 {
     // Charger les animations (loop=true sauf pour attack)
     animations["idle"] = std::make_unique<Animation>(
@@ -19,11 +20,17 @@ Player::Player()
 
     velocity = sf::Vector2f(0.f, 0.f);  // Initialiser velocity
 
-    // Hitbox
+    // Hitbox Joueur (hurtbox)
     hitbox.setSize(sf::Vector2f(24.f, 32.f));
     hitbox.setFillColor(sf::Color::Transparent);
     hitbox.setOutlineColor(sf::Color::Red);
     hitbox.setOutlineThickness(1.f);
+
+    // Hitbox d'attaque (32px par 32px à l'échelle = 48.f x 48.f environ)
+    attackHitbox.setSize(sf::Vector2f(48.f, 48.f));
+    attackHitbox.setFillColor(sf::Color::Transparent);
+    attackHitbox.setOutlineColor(sf::Color::Green);
+    attackHitbox.setOutlineThickness(1.f);
 }
 
 float Player::getVelocityX()const {
@@ -108,9 +115,22 @@ void Player::updateAnimation(float deltaTime) {
     animations[currentAnimation]->update(deltaTime);
     sprite.setTextureRect(animations[currentAnimation]->getCurrentFrame());
 
+    // Activer l'attack hitbox au milieu de l'attaque (frames 1 & 2 sur 4)
+    if (isAttacking) {
+        int currentFrame = animations["attack"]->getCurrentFrameIndex();
+        if (currentFrame == 1 || currentFrame == 2) {
+            attackHitboxActive = true;
+        } else {
+            attackHitboxActive = false;
+        }
+    } else {
+        attackHitboxActive = false;
+    }
+
     // Fin de l'attaque
     if (isAttacking && animations["attack"]->isFinished()) {
         isAttacking = false;
+        attackHitboxActive = false;
         bool moving = sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
         if (moving) {
             switchAnimation("run");
@@ -126,17 +146,37 @@ void Player::update(float deltaTime) {
     updatePhysics(deltaTime);
     updateAnimation(deltaTime);
 
-    // Centrer la hitbox
+    // Centrer la hitbox du joueur (suivi du joueur)
     sf::Vector2f spritePos = sprite.getPosition();
     hitbox.setPosition(spritePos.x - hitbox.getSize().x / 2.f,
         spritePos.y - hitbox.getSize().y / 2.f);
+
+    // Mettre à jour la hitbox d'attaque selon l'orientation
+    float facing = (sprite.getScale().x >= 0.f) ? 1.f : -1.f;
+    float offset = 20.f * facing;
+    if (facing > 0) {
+        attackHitbox.setPosition(spritePos.x + offset, spritePos.y - attackHitbox.getSize().y / 2.f);
+    } else {
+        attackHitbox.setPosition(spritePos.x + offset - attackHitbox.getSize().x, spritePos.y - attackHitbox.getSize().y / 2.f);
+    }
 }
 
 void Player::draw(sf::RenderWindow& window) {
     window.draw(sprite);
     window.draw(hitbox);
+    if (attackHitboxActive) {
+        window.draw(attackHitbox);
+    }
 }
 
 sf::FloatRect Player::getHitbox() const {
     return hitbox.getGlobalBounds();
+}
+
+sf::FloatRect Player::getAttackHitbox() const {
+    return attackHitbox.getGlobalBounds();
+}
+
+bool Player::isAttackActive() const {
+    return attackHitboxActive;
 }

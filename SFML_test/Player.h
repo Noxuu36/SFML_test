@@ -14,6 +14,8 @@ public:
     void draw(sf::RenderWindow& window);   //affichange
 
     sf::FloatRect getHitbox() const;
+    sf::FloatRect getAttackHitbox() const;
+    bool isAttackActive() const;
 
     void handleInput();
     void updatePhysics(float deltaTime);
@@ -33,6 +35,8 @@ private:
 
     // --- Collision ---
     sf::RectangleShape hitbox;
+    sf::RectangleShape attackHitbox;
+    bool attackHitboxActive;
 
     //physique
     sf::Vector2f velocity;

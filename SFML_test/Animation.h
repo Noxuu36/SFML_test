@@ -11,6 +11,7 @@ public:
     void reset();
     sf::IntRect getCurrentFrame() const;
     bool isFinished() const;
+    int getCurrentFrameIndex() const { return currentFrame; }
     const sf::Texture& getTexture() const { return texture; }
     int getFrameWidth() const { return frameWidth; }
     int getFrameHeight() const { return frameHeight; }
