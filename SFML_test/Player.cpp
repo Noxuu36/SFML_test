@@ -1,3 +1,34 @@
+/*
+ * =====================================================================================
+ * GUIDE : COMMENT GÉRER UN CONFLIT DE MERGE GIT (MERGE CONFLICT RESOLUTION)
+ * =====================================================================================
+ * Lorsqu'un conflit de merge survient (par exemple lors de la fusion avec 'master') :
+ *
+ * 1. BALISES DANS LE FICHIER :
+ *    Git insère des marqueurs de conflit autour du code divergent :
+ *    <<<<<<< fix-player-attack-movement-... (Vos modifications actuelles - Current Change)
+ *        float attOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+ *        attackHitbox.setPosition(...);
+ *    =======
+ *        code provenant de la branche cible (Incoming Change)
+ *    >>>>>>> master
+ *
+ * 2. RÉSOLUTION DANS VS CODE :
+ *    - VS Code affiche des liens cliquables au-dessus du conflit :
+ *        * "Accept Current Change"  : Conserve uniquement vos modifications (partie supérieure).
+ *        * "Accept Incoming Change" : Conserve uniquement les modifications de master (partie inférieure).
+ *        * "Accept Both Changes"    : Garde les deux versions l'une après l'autre.
+ *    - Vous pouvez également modifier le code manuellement puis effacer les lignes <<<<<<<, =======, >>>>>>>.
+ *
+ * 3. VALIDER LA RÉSOLUTION :
+ *    - Sauvegardez le fichier (Ctrl + S).
+ *    - Marquez le conflit comme résolu et créez le commit :
+ *        git add Player.cpp
+ *        git commit -m "Résolution du conflit de merge"
+ *        git push
+ * =====================================================================================
+ */
+
 #include "Player.h"
 
 Player::Player()
@@ -151,13 +182,13 @@ void Player::update(float deltaTime) {
     hitbox.setPosition(spritePos.x - hitbox.getSize().x / 2.f,
         spritePos.y - hitbox.getSize().y / 2.f + 8.f);
 
-    // Mettre à jour la hitbox d'attaque selon l'orientation (étendue vers le bas)
+    // Mettre à jour la hitbox d'attaque selon l'orientation
     float facing = (sprite.getScale().x >= 0.f) ? 1.f : -1.f;
-    float offset = 15.f * facing;
+    float offset = 10.f * facing;
     if (facing > 0) {
-        attackHitbox.setPosition(spritePos.x + offset, spritePos.y - attackHitbox.getSize().y / 2.f + 8.f);
+        attackHitbox.setPosition(spritePos.x + offset, spritePos.y - attackHitbox.getSize().y / 2.f + 5.f);
     } else {
-        attackHitbox.setPosition(spritePos.x + offset - attackHitbox.getSize().x, spritePos.y - attackHitbox.getSize().y / 2.f + 8.f);
+        attackHitbox.setPosition(spritePos.x + offset - attackHitbox.getSize().x, spritePos.y - attackHitbox.getSize().y / 2.f + 5.f);
     }
 }
 
