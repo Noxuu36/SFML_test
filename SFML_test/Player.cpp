@@ -22,12 +22,16 @@ Player::Player()
 
     // Hitbox Joueur (hurtbox agrandie vers le bas pour toucher les petits mobs au sol)
     hitbox.setSize(sf::Vector2f(28.f, 48.f));
+    // Hitbox Joueur (hurtbox)
+    hitbox.setSize(sf::Vector2f(24.f, 32.f));
     hitbox.setFillColor(sf::Color::Transparent);
     hitbox.setOutlineColor(sf::Color::Red);
     hitbox.setOutlineThickness(1.f);
 
     // Hitbox d'attaque élargie vers le bas et les côtés
     attackHitbox.setSize(sf::Vector2f(56.f, 56.f));
+    // Hitbox d'attaque (32px par 32px à l'échelle = 48.f x 48.f environ)
+    attackHitbox.setSize(sf::Vector2f(48.f, 48.f));
     attackHitbox.setFillColor(sf::Color::Transparent);
     attackHitbox.setOutlineColor(sf::Color::Green);
     attackHitbox.setOutlineThickness(1.f);
@@ -158,6 +162,18 @@ void Player::update(float deltaTime) {
         attackHitbox.setPosition(spritePos.x + offset, spritePos.y - attackHitbox.getSize().y / 2.f + 8.f);
     } else {
         attackHitbox.setPosition(spritePos.x + offset - attackHitbox.getSize().x, spritePos.y - attackHitbox.getSize().y / 2.f + 8.f);
+    // Centrer la hitbox du joueur (suivi du joueur)
+    sf::Vector2f spritePos = sprite.getPosition();
+    hitbox.setPosition(spritePos.x - hitbox.getSize().x / 2.f,
+        spritePos.y - hitbox.getSize().y / 2.f);
+
+    // Mettre à jour la hitbox d'attaque selon l'orientation
+    float facing = (sprite.getScale().x >= 0.f) ? 1.f : -1.f;
+    float offset = 20.f * facing;
+    if (facing > 0) {
+        attackHitbox.setPosition(spritePos.x + offset, spritePos.y - attackHitbox.getSize().y / 2.f);
+    } else {
+        attackHitbox.setPosition(spritePos.x + offset - attackHitbox.getSize().x, spritePos.y - attackHitbox.getSize().y / 2.f);
     }
 }
 

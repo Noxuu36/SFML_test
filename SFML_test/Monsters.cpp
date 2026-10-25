@@ -85,6 +85,10 @@ void Rat::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAtta
 
     float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
     attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
+    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 15.f);
+
+    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 15.f);
 }
 
 // -------------------------------------------------------------
@@ -262,6 +266,10 @@ void Slime::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAt
 
     float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
     attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
+    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 10.f);
+
+    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 10.f);
 }
 
 // -------------------------------------------------------------
