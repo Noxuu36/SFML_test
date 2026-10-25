@@ -83,16 +83,12 @@ void Rat::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAtta
     pos = sprite.getPosition();
     hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 5.f);
 
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
-    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 15.f);
-
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 15.f);
+    float attOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
 }
 
 // -------------------------------------------------------------
-// BAT (Flying slightly above ground)
+// BAT (Flying)
 // -------------------------------------------------------------
 Bat::Bat(float x, float y)
     : Monster(x, y - 100.f, 20, 130.f)
@@ -138,7 +134,7 @@ void Bat::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAtta
 
     sf::Vector2f pos = sprite.getPosition();
     sf::Vector2f targetPos = playerPos;
-    targetPos.y -= 40.f; // Voler légèrement au-dessus du joueur
+    targetPos.y -= 40.f;
 
     sf::Vector2f dir = targetPos - pos;
     float dist = std::sqrt(dir.x * dir.x + dir.y * dir.y);
@@ -178,8 +174,8 @@ void Bat::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAtta
     pos = sprite.getPosition();
     hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f);
 
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f);
+    float attOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attOffset, pos.y - attackHitbox.getSize().y / 2.f);
 }
 
 // -------------------------------------------------------------
@@ -264,12 +260,8 @@ void Slime::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAt
     pos = sprite.getPosition();
     hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 5.f);
 
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
-    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 10.f);
-
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 10.f);
+    float attOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
 }
 
 // -------------------------------------------------------------
@@ -352,8 +344,8 @@ void Mimic::update(float deltaTime, const sf::Vector2f& playerPos, bool playerAt
     sprite.setTextureRect(animations[currentAnimation]->getCurrentFrame());
 
     pos = sprite.getPosition();
-    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 10.f);
+    hitbox.setPosition(pos.x - hitbox.getSize().x / 2.f, pos.y - hitbox.getSize().y / 2.f + 5.f);
 
-    float attackOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
-    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attackOffset, pos.y - attackHitbox.getSize().y / 2.f + 10.f);
+    float attOffset = isFacingLeft ? -attackHitbox.getSize().x : 0.f;
+    attackHitbox.setPosition(pos.x + (isFacingLeft ? -10.f : 10.f) + attOffset, pos.y - attackHitbox.getSize().y / 2.f + 5.f);
 }
