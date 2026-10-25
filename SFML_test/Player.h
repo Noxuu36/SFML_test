@@ -1,6 +1,9 @@
 #pragma once
 #include "Animation.h"
 #include <iostream>
+#include <memory>
+#include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 
 class Player {
@@ -11,6 +14,8 @@ public:
     void draw(sf::RenderWindow& window);   //affichange
 
     sf::FloatRect getHitbox() const;
+    sf::FloatRect getAttackHitbox() const;
+    bool isAttackActive() const;
 
     void handleInput();
     void updatePhysics(float deltaTime);
@@ -30,6 +35,8 @@ private:
 
     // --- Collision ---
     sf::RectangleShape hitbox;
+    sf::RectangleShape attackHitbox;
+    bool attackHitboxActive;
 
     //physique
     sf::Vector2f velocity;
