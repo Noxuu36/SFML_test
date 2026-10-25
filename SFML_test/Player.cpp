@@ -34,8 +34,22 @@
 Player::Player()
     : scale(4.f), speed(200.f), gravity(1100.f), jumpForce(-500.f),
     maxFallSpeed(1000.f), groundY(1000.f), isOnGround(true), isAttacking(false),
-    attackHitboxActive(false)
+    attackHitboxActive(false), maxHealth(3), currentHealth(3),
+    invincibilityTimer(0.f), invincibilityDuration(1.0f), healthBarLoaded(false)
 {
+    // Charger la texture de la barre de vie
+    if (healthBarTexture.loadFromFile("assets/life/Changing Healthbar Full Heart Set.png") ||
+        healthBarTexture.loadFromFile("SFML_test/assets/life/Changing Healthbar Full Heart Set.png")) {
+        healthBarLoaded = true;
+        healthBarSprite.setTexture(healthBarTexture);
+        healthBarSprite.setScale(3.f, 3.f);
+        healthBarSprite.setPosition(20.f, 20.f);
+
+        // Découpe initiale : 4 barres empilées en colonne (frame 0 = full)
+        unsigned int texWidth = healthBarTexture.getSize().x;
+        unsigned int frameHeight = healthBarTexture.getSize().y / 4;
+        healthBarSprite.setTextureRect(sf::IntRect(0, 0, texWidth, frameHeight));
+    }
     // Charger les animations (loop=true sauf pour attack)
     animations["idle"] = std::make_unique<Animation>(
         "assets/player/herochar_idle_anim_strip_4.png", 16, 16, 4, 0.2f, true);
@@ -172,10 +186,43 @@ void Player::updateAnimation(float deltaTime) {
     }
 }
 
+void Player::takeDamage(int amount) {
+    if (invincibilityTimer > 0.f || currentHealth <= 0) return;
+
+    currentHealth -= amount;
+    if (currentHealth < 0) currentHealth = 0;
+    invincibilityTimer = invincibilityDuration;
+}
+
+int Player::getHealth() const {
+    return currentHealth;
+}
+
+bool Player::isInvincible() const {
+    return invincibilityTimer > 0.f;
+}
+
 void Player::update(float deltaTime) {
+    if (invincibilityTimer > 0.f) {
+        invincibilityTimer -= deltaTime;
+        if (invincibilityTimer < 0.f) invincibilityTimer = 0.f;
+    }
+
     handleInput();
     updatePhysics(deltaTime);
     updateAnimation(deltaTime);
+
+    // Mettre à jour la sous-image de la barre de vie selon currentHealth (3, 2, 1, 0)
+    if (healthBarLoaded) {
+        // 3 HP -> ligne 0, 2 HP -> ligne 1, 1 HP -> ligne 2, 0 HP -> ligne 3
+        int frameIndex = 3 - currentHealth;
+        if (frameIndex < 0) frameIndex = 0;
+        if (frameIndex > 3) frameIndex = 3;
+
+        unsigned int texWidth = healthBarTexture.getSize().x;
+        unsigned int frameHeight = healthBarTexture.getSize().y / 4;
+        healthBarSprite.setTextureRect(sf::IntRect(0, frameIndex * frameHeight, texWidth, frameHeight));
+    }
 
     // Alignement au sol exact et centrage de la hitbox
     sf::Vector2f spritePos = sprite.getPosition();
@@ -193,10 +240,24 @@ void Player::update(float deltaTime) {
 }
 
 void Player::draw(sf::RenderWindow& window) {
-    window.draw(sprite);
+    // Clignotement pendant l'invulnérabilité
+    if (invincibilityTimer > 0.f) {
+        int blink = static_cast<int>(invincibilityTimer * 10.f);
+        if (blink % 2 == 0) {
+            window.draw(sprite);
+        }
+    } else {
+        window.draw(sprite);
+    }
+
     window.draw(hitbox);
     if (attackHitboxActive) {
         window.draw(attackHitbox);
+    }
+
+    // Afficher la barre de vie en haut à gauche
+    if (healthBarLoaded) {
+        window.draw(healthBarSprite);
     }
 }
 

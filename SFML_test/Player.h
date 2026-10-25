@@ -17,6 +17,10 @@ public:
     sf::FloatRect getAttackHitbox() const;
     bool isAttackActive() const;
 
+    void takeDamage(int amount = 1);
+    int getHealth() const;
+    bool isInvincible() const;
+
     void handleInput();
     void updatePhysics(float deltaTime);
     void updateAnimation(float deltaTime);
@@ -29,7 +33,7 @@ public:
 private:
     // --- Visuel ---
     sf::Sprite sprite;
-    std::map<std::string, std::unique_ptr <Animation>> animations; //map d'animation associ� a un nom
+    std::map<std::string, std::unique_ptr <Animation>> animations; //map d'animation associé a un nom
     std::string currentAnimation;
     float scale;
 
@@ -48,5 +52,13 @@ private:
     bool isAttacking;
     float groundY;
 
+    // --- SantÃ© et Barre de vie ---
+    int maxHealth;
+    int currentHealth;
+    float invincibilityTimer;
+    float invincibilityDuration;
 
+    sf::Texture healthBarTexture;
+    sf::Sprite healthBarSprite;
+    bool healthBarLoaded;
 };

@@ -46,6 +46,14 @@ void MonsterManager::update(float deltaTime, Player& player) {
 
     for (auto& monster : monsters) {
         monster->update(deltaTime, playerPos, playerAttacking, playerAttackBox);
+
+        // Vérifier si le monstre attaque et touche le joueur
+        if (monster->isAttacking() && monster->getAttackHitbox().intersects(playerBounds)) {
+            player.takeDamage(1);
+        } else if (monster->getHitbox().intersects(playerBounds) && !monster->isDead()) {
+            // Degâts de contact basiques si le monstre rentre en collision directe
+            player.takeDamage(1);
+        }
     }
 
     // Retirer les monstres morts/marqués pour suppression
