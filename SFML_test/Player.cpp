@@ -16,7 +16,7 @@ Player::Player()
     currentAnimation = "idle";  //anim de base
     sprite.setTexture(animations[currentAnimation]->getTexture());
     sprite.setScale(scale, scale);
-    sprite.setPosition(400.f, groundY);
+    sprite.setPosition(400.f, groundY-20);
 
     velocity = sf::Vector2f(0.f, 0.f);  // Initialiser velocity
 
