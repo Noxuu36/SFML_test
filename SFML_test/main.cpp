@@ -1,8 +1,13 @@
 #include <SFML/Graphics.hpp>
+#include <cstdlib>
+#include <ctime>
 #include "Player.h"
 #include "Background.h"
+#include "MonsterManager.h"
 
 int main() {
+    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+
     sf::RenderWindow window(sf::VideoMode(2000, 1200), "SFML Exemple");
     window.setFramerateLimit(60);
 
@@ -17,6 +22,7 @@ int main() {
     background.setScale(scaleX, scaleY);
 
     Player player;
+    MonsterManager monsterManager(static_cast<float>(windowSize.x), 1000.f);
 
     sf::Clock clock;
 
@@ -30,14 +36,14 @@ int main() {
         float dt = clock.restart().asSeconds();
         player.update(dt);
         background.update(dt, player.getVelocityX());
-        
+        monsterManager.update(dt, player);
 
         window.clear();
 
         background.draw(window);
 
         player.draw(window);
-        
+        monsterManager.draw(window);
 
         window.display();
     }
