@@ -45,12 +45,6 @@ void Player::switchAnimation(const std::string& animName) {
 void Player::handleInput() {
     bool moving = false;
 
-    // Empêcher input pendant l'attaque
-    if (isAttacking) {
-        velocity.x = 0.f;  // Arrêter le mouvement horizontal
-        return;  // Ne pas traiter les autres inputs
-    }
-
     // Saut
     if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && isOnGround) {
         velocity.y = jumpForce;
@@ -58,11 +52,9 @@ void Player::handleInput() {
     }
 
     // Attaque
-    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+    if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter) && !isAttacking) {
         isAttacking = true;
-        velocity.x = 0.f;  // Arrêter le mouvement
         switchAnimation("attack");
-        return;  // Ne pas traiter les autres inputs
     }
 
     // Mouvement horizontal
@@ -80,12 +72,14 @@ void Player::handleInput() {
         velocity.x = 0.f;
     }
 
-    // Changer l'animation selon le mouvement
-    if (moving) {
-        switchAnimation("run");
-    }
-    else {
-        switchAnimation("idle");
+    // Changer l'animation selon le mouvement seulement si pas en train d'attaquer
+    if (!isAttacking) {
+        if (moving) {
+            switchAnimation("run");
+        }
+        else {
+            switchAnimation("idle");
+        }
     }
 }
 
@@ -117,7 +111,13 @@ void Player::updateAnimation(float deltaTime) {
     // Fin de l'attaque
     if (isAttacking && animations["attack"]->isFinished()) {
         isAttacking = false;
-        switchAnimation("idle");
+        bool moving = sf::Keyboard::isKeyPressed(sf::Keyboard::Q) || sf::Keyboard::isKeyPressed(sf::Keyboard::D);
+        if (moving) {
+            switchAnimation("run");
+        }
+        else {
+            switchAnimation("idle");
+        }
     }
 }
 
