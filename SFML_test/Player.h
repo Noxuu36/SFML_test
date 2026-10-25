@@ -1,6 +1,9 @@
 #pragma once
 #include "Animation.h"
 #include <iostream>
+#include <memory>
+#include <map>
+#include <string>
 #include <SFML/Graphics.hpp>
 
 class Player {
